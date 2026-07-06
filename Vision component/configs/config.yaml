@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Gender Detection Component — Master Configuration
+# Select environment: ENV=development | production (default: development)
+# ─────────────────────────────────────────────────────────────────────────────
+
+defaults:
+  component:
+    name: "gender_detection"
+    version: "1.0.0"
+    log_level: "INFO"
+
+  device:
+    preferred: "auto"
+    cuda_device_index: 0
+
+  model_paths:
+    face_detector_weights: "models/weights/retinaface_resnet50.pth"
+    gender_classifier_weights: "vit_b16_gender_phase2.pth" # Phase 2 weights are in the root
+
+  face_detection:
+    confidence_threshold: 0.85
+    nms_threshold: 0.4
+    top_k: 5000
+    keep_top_k: 750
+    resize_long_edge: 640
+    min_face_size_px: 40
+    multi_face_strategy: "largest"
+    max_faces_per_frame: 1
+
+  face_alignment:
+    output_size: [224, 224]
+    template: "arcface"
+    border_mode: "constant"
+
+  frame_gate:
+    stride: 5
+    phash_size: 16
+    cache_hamming_threshold: 10
+    cache_resize_to: [64, 64]
+
+  inference:
+    use_fp16: false
+    use_torch_compile: true
+    warmup_on_init: true
+
+  result_smoother:
+    window_size: 10
+    min_confidence_to_include: 0.55
+
+  output:
+    return_face_bbox: true
+    return_confidence: true
+    confidence_decimal_places: 4
+
+# ── Environment overrides ─────────────────────────────────────────────────────
+
+development:
+  component:
+    log_level: "DEBUG"
+  frame_gate:
+    stride: 5
+  inference:
+    use_fp16: false
+    warmup_on_init: false
+
+production:
+  component:
+    log_level: "WARNING"
+  frame_gate:
+    cache_hamming_threshold: 8
+  inference:
+    use_fp16: true
